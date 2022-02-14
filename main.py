@@ -91,6 +91,7 @@ def parse_solution(complexity):
 while True:
     giver, seed, complexity,  _, expire = get_job()
     createJob(seed)
+    createJobTime=get_now()
 
     while True:
         solution = Path(SOLUTION_FILENAME)
@@ -98,6 +99,7 @@ while True:
             success, result=parse_solution(complexity)
             if (success):
                 sendJobResult(giver,result)
+                print('duration:', createJobTime-get_now())
                 break
             printWarning('Wrong result '+ result)
 
