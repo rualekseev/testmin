@@ -7,25 +7,13 @@ import datetime
 import time
 import os
 from pathlib import Path
+import hashlib
+
 
 ## Need to init wallet in https://t.me/WhalesPoolBot
 MINER_ADDR='EQCtj6TVhsruuFZX5j9xNMD8SnpEYegHjPfwxitl2IIPoKTB'
 
-GIVERS = [
-    'kf-kkdY_B7p-77TLn2hUhM6QidWrrsl8FYWCIvBMpZKprBtN', 
-    'kf8SYc83pm5JkGt0p3TQRkuiM58O9Cr3waUtR9OoFq716lN-', 
-    'kf-FV4QTxLl-7Ct3E6MqOtMt-RGXMxi27g4I645lw6MTWraV',
-    'kf_NSzfDJI1A3rOM0GQm7xsoUXHTgmdhN5-OrGD8uwL2JMvQ', 
-    'kf8gf1PQy4u2kURl-Gz4LbS29eaN4sVdrVQkPO-JL80VhOe6',
-    'kf8kO6K6Qh6YM4ddjRYYlvVAK7IgyW8Zet-4ZvNrVsmQ4EOF', 
-    'kf-P_TOdwcCh0AXHhBpICDMxStxHenWdLCDLNH5QcNpwMHJ8',
-    'kf91o4NNTryJ-Cw3sDGt9OTiafmETdVFUMvylQdFPoOxIsLm', 
-    'kf9iWhwk9GwAXjtwKG-vN7rmXT3hLIT23RBY6KhVaynRrIK7',
-    'kf8JfFUEJhhpRW80_jqD7zzQteH6EBHOzxiOhygRhBdt4z2N', 
-]
-
 SOLUTION_FILENAME="solution.txt"
-
 POOL_JOB_URL = 'https://pool.services.tonwhales.com/job'
 POOL_RESULT_URL='https://pool.services.tonwhales.com/submit'
 
@@ -84,6 +72,8 @@ def parse_solution(complexity):
     if solution.is_file():
         with open(SOLUTION_FILENAME) as file:
             lines = file.readlines()
+            os.remove(SOLUTION_FILENAME)
+
         
         ## нужно отправлять 123 байта от которых считается хеш в hex
         result = lines[0].replace('\n', '').replace(' ', '')
@@ -91,7 +81,7 @@ def parse_solution(complexity):
 
         success=False
 
-        if (int(complexity,16)<int(result,16)):
+        if (int(complexity,16) < int(hashlib.sha256(result).hexdigest(), 16)):
             success=True
 
         return success, result
@@ -106,7 +96,6 @@ while True:
         solution = Path(SOLUTION_FILENAME)
         if solution.is_file():
             success, result=parse_solution(complexity)
-            os.remove(SOLUTION_FILENAME)
             if (success):
                 sendJobResult(giver,result)
                 break
@@ -117,4 +106,3 @@ while True:
         if (int(expire) < get_now()):
             printWarning('Job timeout')
             break
-
