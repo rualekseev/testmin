@@ -85,6 +85,7 @@ def parse_solution():
         
         ## нужно отправлять 123 байта от которых считается хеш в hex
         result = lines[0].replace('\n', '').replace(' ', '')
+        result = result[:123*2]
 
         return result
     printError('Not found ' + SOLUTION_FILENAME)
