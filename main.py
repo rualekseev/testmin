@@ -103,7 +103,7 @@ while True:
             os.remove(SOLUTION_FILENAME)
             break
 
-        time.sleep(0.1)
+        time.sleep(0.01)
         
         if (int(expire) < get_now()):
             printWarning('Job timeout')
