@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import string
 from urllib import request, parse
 import json
@@ -77,7 +79,7 @@ def sendJobResult(giver, result):
 
     
 
-def parse_solution():
+def parse_solution(complexity):
     solution = Path(SOLUTION_FILENAME)
     if solution.is_file():
         with open(SOLUTION_FILENAME) as file:
@@ -87,24 +89,32 @@ def parse_solution():
         result = lines[0].replace('\n', '').replace(' ', '')
         result = result[:123*2]
 
-        return result
+        success=False
+
+        if (int(complexity,16)<int(result,16)):
+            success=True
+
+        return success, result
     printError('Not found ' + SOLUTION_FILENAME)
     exit()
     
 while True:
-    giver, seed, _,  _, expire = get_job()
+    giver, seed, complexity,  _, expire = get_job()
     createJob(seed)
 
     while True:
         solution = Path(SOLUTION_FILENAME)
         if solution.is_file():
-            result=parse_solution()
-            sendJobResult(giver,result)
+            success, result=parse_solution(complexity)
             os.remove(SOLUTION_FILENAME)
-            break
+            if (success):
+                sendJobResult(giver,result)
+                break
+            printWarning('Wrong result '+ result)
 
         time.sleep(0.03)
         
         if (int(expire) < get_now()):
             printWarning('Job timeout')
             break
+
