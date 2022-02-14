@@ -72,7 +72,7 @@ def sendJobResult(giver, result):
 
     response = request.urlopen(req, jsondatabytes)
 
-    printSuccess("Sended: " +jsondata + " Responce: " + response.read())
+    printSuccess("Sended: " +jsondata + " Responce: " + response.read().decode('utf-8'))
 
 
     
