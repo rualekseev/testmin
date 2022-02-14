@@ -1,10 +1,13 @@
 import string
-import urllib.request
+from urllib import request, parse
 import json
 import datetime
 import time
+import os
 from pathlib import Path
 
+## Need to init wallet in https://t.me/WhalesPoolBot
+MINER_ADDR='EQCtj6TVhsruuFZX5j9xNMD8SnpEYegHjPfwxitl2IIPoKTB'
 
 GIVERS = [
     'kf-kkdY_B7p-77TLn2hUhM6QidWrrsl8FYWCIvBMpZKprBtN', 
@@ -19,13 +22,25 @@ GIVERS = [
     'kf8JfFUEJhhpRW80_jqD7zzQteH6EBHOzxiOhygRhBdt4z2N', 
 ]
 
-POOL_URL = 'https://pool.services.tonwhales.com/job'
+SOLUTION_FILENAME="solution.txt"
 
-def get_now()-> (str):
+POOL_JOB_URL = 'https://pool.services.tonwhales.com/job'
+POOL_RESULT_URL='https://pool.services.tonwhales.com/submit'
+
+def printError(detail):
+    print("Error:",detail)
+
+def printSuccess(detail):
+    print("Success:", detail)
+
+def printWarning(detail):
+    print("Warning:", detail)
+
+def get_now()-> (int):
     return int(datetime.datetime.timestamp(datetime.datetime.utcnow()))
 
 def get_job():
-    job=json.loads(urllib.request.urlopen(POOL_URL, timeout = 5).read())
+    job=json.loads(request.urlopen(POOL_JOB_URL, timeout = 5).read())
     print(job)
     expire=job["expire"]
     seed=job["seed"]
@@ -33,7 +48,7 @@ def get_job():
     complexity=job["complexity"]
     prefix=job["prefix"]
     giver=job["giver"]
-    return giver, seed, complexity, wallet
+    return giver, seed, complexity, wallet, expire
 
 def createJob(seed):
     seed_dec=int(seed,16)
@@ -45,15 +60,57 @@ def createJob(seed):
     f.close()
     return
 
-giver, seed, _,  _ = get_job()
-createJob(seed)
+def sendJobResult(giver, result):
 
-while True:
-    solution = Path("solution.txt")
+    data_set={"giver":giver, "miner_addr": MINER_ADDR, "inputs": [result]}
+    jsondata = json.dumps(data_set)
+    jsondatabytes=jsondata.encode('utf-8')
+
+    req = request.Request(POOL_RESULT_URL)
+    req.add_header('Content-Type', 'application/json; charset=utf-8')
+    req.add_header('Content-Length', len(jsondatabytes))
+
+    response = request.urlopen(req, jsondatabytes)
+
+    printSuccess(response.read())
+
+
+    
+
+def parse_solution():
+    solution = Path(SOLUTION_FILENAME)
     if solution.is_file():
-        print('SUCCESS')
-        exit()
-    time.sleep(0.1)
+        with open(SOLUTION_FILENAME) as file:
+            lines = file.readlines()
+        
+        ## нужно отправлять 123 байта от которых считается хеш в hex
+        result = lines[0].replace('\n', '').replace(' ', '')
+
+        return result
+    printError('Not found ' + SOLUTION_FILENAME)
+    exit()
+    
+while True:
+    giver, seed, _,  _, expire = get_job()
+    createJob(seed)
+
+    while True:
+        solution = Path(SOLUTION_FILENAME)
+        if solution.is_file():
+            result=parse_solution()
+            sendJobResult(giver,result)
+            os.remove(SOLUTION_FILENAME)
+            break
+
+        time.sleep(0.1)
+        
+        if (int(expire) < get_now()):
+            printWarning('Job timeout')
+            break
+
+        
+
+
 
 
 
