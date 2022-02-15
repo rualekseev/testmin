@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-import string
-from urllib import request, parse
+## ITGOLD.IO 2022
+
+from urllib import request
 import json
 import datetime
 import time
@@ -26,6 +27,10 @@ def printSuccess(detail):
 def printWarning(detail):
     print("Warning:", detail)
 
+def printInfo(detail):
+    print("Info:", detail)
+
+
 def get_now()-> (int):
     return int(datetime.datetime.timestamp(datetime.datetime.utcnow()))
 
@@ -36,7 +41,7 @@ def get_job():
     seed=job["seed"]
     wallet=job["wallet"]
     complexity=job["complexity"]
-    prefix=job["prefix"]
+    prefix=job["prefix"]  #don't use
     giver=job["giver"]
     return giver, seed, complexity, wallet, expire
 
@@ -51,7 +56,6 @@ def createJob(seed):
     return
 
 def sendJobResult(giver, result):
-
     data_set={"giver":giver, "miner_addr": MINER_ADDR, "inputs": [result]}
     jsondata = json.dumps(data_set)
     jsondatabytes=jsondata.encode('utf-8')
@@ -99,7 +103,7 @@ while True:
             success, result=parse_solution(complexity)
             if (success):
                 sendJobResult(giver,result)
-                print('duration:', createJobTime-get_now())
+                printInfo('duration:' + createJobTime-get_now())
                 break
             printWarning('Wrong result '+ result)
 
