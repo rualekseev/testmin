@@ -85,7 +85,7 @@ def parse_solution(complexity):
 
         success=False
 
-        if (int(complexity,16) < int(hashlib.sha256(bytes.fromhex(result)).hexdigest(), 16)):
+        if (int(complexity,16) > int(hashlib.sha256(bytes.fromhex(result)).hexdigest(), 16)):
             success=True
 
         return success, result
