@@ -103,7 +103,8 @@ while True:
             success, result=parse_solution(complexity)
             if (success):
                 sendJobResult(giver,result)
-                printInfo('duration:' + createJobTime-get_now())
+                diff=get_now()-createJobTime
+                printInfo('duration:' + diff)
                 break
             printWarning('Wrong result '+ result)
 
