@@ -104,7 +104,7 @@ while True:
             if (success):
                 sendJobResult(giver,result)
                 diff=get_now()-createJobTime
-                printInfo('duration:' + diff)
+                printInfo('duration:' + str(diff))
                 break
             printWarning('Wrong result '+ result)
 
