@@ -36,7 +36,7 @@ def get_now()-> (int):
 
 def get_job():
     job=json.loads(request.urlopen(POOL_JOB_URL, timeout = 5).read())
-    print(job)
+    printInfo(job)
     expire=job["expire"]
     seed=job["seed"]
     wallet=job["wallet"]
@@ -85,7 +85,7 @@ def parse_solution(complexity):
 
         success=False
 
-        if (int(complexity,16) > int(hashlib.sha256(bytes.fromhex(result)).hexdigest(), 16)):
+        if (int(complexity,16) < int(hashlib.sha256(bytes.fromhex(result)).hexdigest(), 16)):
             success=True
 
         return success, result
